@@ -42,7 +42,7 @@ class Doctrine {
 				'port' => '',
 				'user' => 'root',
 				'password' => '',
-				'dbname' => 'deparqueo'
+				'dbname' => 'deparqueo_bd'
 			);
 
 			/*$connectionOptions = array(

@@ -61,6 +61,13 @@ function __construct() {}
     private $documento;
 
     /**
+     * @var string
+     *
+     * @Column(name="rfid", type="string", length=20, nullable=true)
+     */
+    private $rfid;
+
+    /**
      * @var \DateTime
      *
      * @Column(name="fechanacimiento", type="date", nullable=true)
@@ -192,6 +199,23 @@ function __construct() {}
     {
         return $this->nombre;
     }
+
+    public function setRfid($rfid)
+    {
+        $this->rfid = $rfid;
+    
+        return $this;
+    }
+
+    /**
+     *
+     * @return string 
+     */
+    public function getRfid()
+    {
+        return $this->rfid;
+    }
+
 
     /** 
      * Set documento

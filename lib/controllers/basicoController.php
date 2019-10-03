@@ -1,7 +1,7 @@
 <?php
 
 //error_reporting(E_ALL);
-error_reporting(1);
+error_reporting(0);
 ini_set('display_errors', '1');
 //define('DS', DIRECTORY_SEPARATOR);
 include_once ("application" . DS . "Controller.php");
@@ -62,7 +62,7 @@ class basicoController extends Controller {
       );
       if(!$tarjeta){
         $array['respuesta'] = false;
-        $array['mensaje'] = 'Tarjete no Existe';
+        $array['mensaje'] = 'RFID no existe';
         return  json_encode($array);
       }
       $temp = $this->_ingresoTarjeta->dql("SELECT it FROM Entities\IngresoTarjeta it JOIN it.id i 
@@ -70,16 +70,7 @@ class basicoController extends Controller {
           array('tarjeta' => $tarjeta->getRfid()));
       if($temp){
         $array['respuesta'] = false;
-        $array['mensaje'] = 'Tarjeta se Encuentra registrada';
-        return  json_encode($array);
-      }
-      $tempMultiple = $this->_ingresoTarjeta->dql("SELECT it FROM Entities\IngresoTarjeta it JOIN it.id i
-        JOIN it.tarjeta tar 
-        WHERE i.fechasalida IS NULL AND tar.cliente =:cliente",
-          array('cliente' => $tarjeta->getCliente()->getId()));
-      if($tempMultiple){
-        $array['respuesta'] = false;
-        $array['mensaje'] = 'El Usuario ya se Encuentra Ingresado';
+        $array['mensaje'] = 'RFID ya se registro';
         return  json_encode($array);
       }
       $this->_ingreso->getInstance()->setTipo(
@@ -133,10 +124,7 @@ class basicoController extends Controller {
           $salida = true;
       }
       if(count($this->_ingresoNormal->getInstance()->getCancelados())){
-          //$salida = true;
-	$array['respuesta'] = false;
-        $array['mensaje'] = 'El TICKET esta Anulado';
-        return  json_encode($array);
+          $salida = true;
       }
       if(!$salida && !count($this->_ingresoNormal->getInstance()->getPagos())){
         $array['respuesta'] = false;
@@ -200,13 +188,6 @@ class basicoController extends Controller {
         $array['mensaje'] = 'No se encuentra el TICKET';
         return  json_encode($array);
       }
-      $this->_ingresoNormal->get($this->_ingreso->getInstance()->getId());
-      if(count($this->_ingresoNormal->getInstance()->getCancelados())){
-	$array['respuesta'] = false;
-        $array['mensaje'] = 'El TICKET esta Cancelado';
-        return  json_encode($array);
-      }
-
       $array['respuesta'] = true;
       $array['ticket'] = $this->_ingreso->getInstance()->getNumero();
       $array['fecha'] = $this->_ingreso->getInstance()->getFecha()->format('d-m-Y');
@@ -216,7 +197,6 @@ class basicoController extends Controller {
         $array['fechaSalida'] = $this->_ingreso->getInstance()->getFechaSalida()->format('d-m-Y h:i');
       }
       if($this->_pago->getInstance()->getId()){
-	
         $array['facturaVenta'] = rand(1,1000);
         $array['valorPagado'] = $this->_pago->getInstance()->getValor()+$this->_pago->getInstance()->getIva();
         $array['valor'] = $this->_pago->getInstance()->getValor();

@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(0);
+
 ini_set('xdebug.var_display_max_depth', '1000');
 ini_set('xdebug.var_display_max_children', '1024');
 ini_set('xdebug.var_display_max_data', '4096');
@@ -66,6 +68,17 @@ class Server {
     echo $basico->salida($data);  
   }
 
+  private function ticket($data){
+    include('controllers/basicoController.php');
+    $basico = new basicoController();
+    echo $basico->ticket($data);  
+  }
+
+  private function ticket_pago($data){
+    include('controllers/basicoController.php');
+    $basico = new basicoController();
+    echo $basico->ticket_pago($data);  
+  }
 
   private function handle_base($method) {
     switch($method) {
