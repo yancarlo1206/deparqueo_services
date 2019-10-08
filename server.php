@@ -80,6 +80,13 @@ class Server {
     echo $basico->ticket_pago($data);  
   }
 
+  private function consulta_pago($data){
+    include('controllers/basicoController.php');
+    $basico = new basicoController();
+    echo $basico->consulta_pago($data);  
+  }
+
+
   private function handle_base($method) {
     switch($method) {
       case 'GET':

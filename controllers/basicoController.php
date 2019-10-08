@@ -21,6 +21,7 @@ class basicoController extends Controller {
         $this->_tipoTarifa = $this->loadModel('tipotarifa');
         $this->_caja = $this->loadModel('caja');
         $this->_usuario = $this->loadModel('usuario');
+	$this->_variable = $this->loadModel('variable');
     }
 
     public function index() { }
@@ -62,7 +63,7 @@ class basicoController extends Controller {
       );
       if(!$tarjeta){
         $array['respuesta'] = false;
-        $array['mensaje'] = 'Tarjete no Existe';
+        $array['mensaje'] = 'Tarjeta no Existe';
         return  json_encode($array);
       }
       $temp = $this->_ingresoTarjeta->dql("SELECT it FROM Entities\IngresoTarjeta it JOIN it.id i 
@@ -104,6 +105,23 @@ class basicoController extends Controller {
       return  json_encode($array);
     }
 
+    public function consulta_pago($data){
+    	$sql = "SELECT usuario.usuario, SUM(pago.valor+pago.iva) AS total, COUNT(pago.id) AS cantidad 
+        FROM pago INNER JOIN usuario ON usuario.id = pago.usuario INNER JOIN rol ON rol.id = usuario.rol
+        WHERE DATE(fecha) = CURDATE() AND rol.id=4
+        GROUP BY usuario.usuario";
+	$temp =	$this->_pago->nativeQuery($sql);
+	$arrayInt = array();
+	$array = array();
+	foreach ($temp as $key => $value) {
+	   $arrayInt['usuario'] = $value['usuario'];
+	   $arrayInt['cantidad'] = $value['cantidad'];
+	   $arrayInt['total'] = $value['total'];
+           $array[] = $arrayInt;
+        }
+        return  json_encode($array);
+    }
+
     public function salida($data){
       $cant = strlen($data->ticket);
       if($cant == 12){
@@ -124,7 +142,7 @@ class basicoController extends Controller {
       }
       if($this->_ingreso->getInstance()->getFechaSalida()){
         $array['respuesta'] = false;
-        $array['mensaje'] = 'El TICKET ya se encuentra registrado';
+        $array['mensaje'] = 'El TICKET ya Salio';
         return  json_encode($array);
       }
       $this->_ingresoNormal->get($this->_ingreso->getInstance()->getId());
@@ -217,7 +235,7 @@ class basicoController extends Controller {
       }
       if($this->_pago->getInstance()->getId()){
 	
-        $array['facturaVenta'] = rand(1,1000);
+        $array['facturaVenta'] = $this->_pago->getInstance()->getFactura();
         $array['valorPagado'] = $this->_pago->getInstance()->getValor()+$this->_pago->getInstance()->getIva();
         $array['valor'] = $this->_pago->getInstance()->getValor();
         $array['iva'] = $this->_pago->getInstance()->getIva();
@@ -266,6 +284,7 @@ class basicoController extends Controller {
     public function ticket_pago($data){
       $array = array();
       $ticket = $data->ticket;
+      $rfid = $data->rfid;
       $this->_ingreso->findByObject(array('numero' => $ticket));
       if(!$this->_ingreso->getInstance()->getNumero()){
         $array['respuesta'] = false;
@@ -278,6 +297,7 @@ class basicoController extends Controller {
         $array['mensaje'] = 'El TICKET ya esta pagado';
         return  json_encode($array);
       }
+      $this->_usuario->findByObject(array('rfid' => $rfid));
       $fechaEntrada = $this->_ingreso->getInstance()->getFechaIngreso();
       $fechaSalida = new \DateTime();
       $fechaIntervalo = $fechaEntrada->diff($fechaSalida);
@@ -290,11 +310,17 @@ class basicoController extends Controller {
       $this->_pago->getInstance()->setEntrego(0);
       $this->_pago->getInstance()->setCambio(0);
       $this->_pago->getInstance()->setIngreso($this->_ingreso->getInstance()->getId());
-      $this->_pago->getInstance()->setUsuario($this->_usuario->get(1));
-      $this->_pago->getInstance()->setCaja($this->_caja->get(1));
+      $this->_pago->getInstance()->setUsuario($this->_usuario->getInstance());
+      $this->_pago->getInstance()->setCaja($this->_caja->get(2));
+      $this->_variable->get(1);
+      $consecutivo = $this->_variable->getInstance()->getValor();
+      $this->_pago->getInstance()->setFactura($consecutivo);
       $this->_pago->save();
       $this->_pagoServicio->getInstance()->setId($this->_pago->getInstance());
       $this->_pagoServicio->getInstance()->setIngreso($this->_ingresoNormal->get($this->_ingreso->getInstance()->getId()));
+      $consecutivo = $consecutivo+1;
+      $this->_variable->getInstance()->setValor($consecutivo);
+      $this->_variable->update();
       $this->_pagoServicio->save();
       return $this->ticket($data);
     }
