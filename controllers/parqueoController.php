@@ -140,7 +140,7 @@ class parqueoController extends Controller {
       }
       if(count($this->_ingresoNormal->getInstance()->getCancelados())){
           //$salida = true;
-	$array['respuesta'] = false;
+	      $array['respuesta'] = false;
         $array['mensaje'] = 'El TICKET esta Anulado';
         return  json_encode($array);
       }
