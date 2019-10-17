@@ -1,5 +1,8 @@
 <?php
 
+error_reporting(1);
+ini_set('display_errors', '1');
+
 include_once ("application" . DS . "Controller.php");
 
 class parqueoController extends Controller {
@@ -71,12 +74,18 @@ class parqueoController extends Controller {
         $array['mensaje'] = 'Tarjeta no Existe';
         return  json_encode($array);
       }
+      $fechaActual = new DateTime();
+      if($tarjeta ->getFechaFin() < $fechaIngreso){
+        $array['respuesta'] = false;
+        $array['mensaje'] = 'Tarjeta Vencida - Vigencia hasta: '.$tarjeta->getFechaFin()->format('d/m/Y');
+        return  json_encode($array);
+      }
       $temp = $this->_ingresoTarjeta->dql("SELECT it FROM Entities\IngresoTarjeta it JOIN it.id i 
         WHERE it.tarjeta =:tarjeta AND i.fechasalida IS NULL",
           array('tarjeta' => $tarjeta->getRfid()));
       if($temp){
         $array['respuesta'] = false;
-        $array['mensaje'] = 'Tarjeta se Encuentra registrada';
+        $array['mensaje'] = 'Tarjeta ya tiene una Entrada Registrada';
         return  json_encode($array);
       }
       $tempMultiple = $this->_ingresoTarjeta->dql("SELECT it FROM Entities\IngresoTarjeta it JOIN it.id i
@@ -85,7 +94,7 @@ class parqueoController extends Controller {
           array('cliente' => $tarjeta->getCliente()->getId()));
       if($tempMultiple){
         $array['respuesta'] = false;
-        $array['mensaje'] = 'El Usuario ya se Encuentra Ingresado';
+        $array['mensaje'] = 'El Usuario ya tiene una de sus Tarjetas con Entrada';
         return  json_encode($array);
       }
       $this->_ingreso->getInstance()->setTipo(
