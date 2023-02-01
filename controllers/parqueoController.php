@@ -14,6 +14,7 @@ class parqueoController extends Controller {
         $this->_ingresoTarjeta = $this->loadModel('ingresotarjeta');
         $this->_pago = $this->loadModel('pago');
         $this->_pagoServicio = $this->loadModel('pagoservicio');
+        $this->_pagoSancion = $this->loadModel('pagosancion');
         $this->_tarjeta = $this->loadModel('tarjeta');
         $this->_tipoVehiculo = $this->loadModel('tipovehiculo');
         $this->_tarifa = $this->loadModel('tarifa');
@@ -88,7 +89,7 @@ class parqueoController extends Controller {
         $array['mensaje'] = 'Tarjeta ya tiene una Entrada Registrada';
         return  json_encode($array);
       }
-      $tempMultiple = $this->_ingresoTarjeta->dql("SELECT it FROM Entities\IngresoTarjeta it JOIN it.id i
+      /*$tempMultiple = $this->_ingresoTarjeta->dql("SELECT it FROM Entities\IngresoTarjeta it JOIN it.id i
         JOIN it.tarjeta tar 
         WHERE i.fechasalida IS NULL AND tar.cliente =:cliente",
           array('cliente' => $tarjeta->getCliente()->getId()));
@@ -96,7 +97,7 @@ class parqueoController extends Controller {
         $array['respuesta'] = false;
         $array['mensaje'] = 'El Usuario ya tiene una de sus Tarjetas con Entrada';
         return  json_encode($array);
-      }
+      }*/
       $this->_ingreso->getInstance()->setTipo(
         $this->_tipoVehiculo->get($tarjeta->getTipoVehiculo()->getId())
       );
@@ -107,11 +108,22 @@ class parqueoController extends Controller {
         $this->_ingresoTarjeta->getInstance()->setId($this->_ingreso->getInstance());
         $this->_ingresoTarjeta->getInstance()->setTarjeta($tarjeta);
         $this->_ingresoTarjeta->save();
+
+        $datetime1 = new DateTime($fechaIngreso->format('Y-m-d'));
+        $datetime2 = new DateTime($tarjeta->getFechaFin()->format('Y-m-d'));
+        $interval = $datetime1->diff($datetime2);
+        //$dias = $interval->format('%R%a días');
+        $dias = $interval->format('%R%a');
+        $dias = $dias - 1;
+        $dias = $dias." días";
+        $dias = str_replace("+","",$dias);
+
         $array['respuesta'] = true;
         $array['numero'] = 0;
         $array['tipo'] = $tarjeta->getTipoVehiculo()->getId();
         $array['descripcion'] = $tarjeta->getTipoVehiculo()->getDescripcion();
         $array['fecha'] = $this->_ingreso->getInstance()->getFechaingreso()->format('d-m-Y H:i');
+        $array['vigencia'] = 'Vencimiento: '.$dias.'.';
       } catch (Exception $e) {
         $array['respuesta'] = false;
         $array['mensaje'] = 'Error en el Proceso';
@@ -190,14 +202,47 @@ class parqueoController extends Controller {
         $array['mensaje'] = 'No se encuentra el Ingreso de la Tarjeta';
         return  json_encode($array);
       }
+      $tipoCliente = $tarjeta->getCliente()->getTipoCliente()->getId();
+      $tipoTarifa = $tarjeta->getTarifa()->getTipoTarifa()->getId();
       $this->_ingreso->get($ingresoTarjeta[0]->getId()->getId());
+      ///VALIDAR SI LA SALIDA ES AL SIGUIENTE DIA///
+      $fechaEntrada = $this->_ingreso->getInstance()->getFecha();
+      $fechaSalida = new \DateTime();
+      $fechaIntervalo = $fechaEntrada->diff($fechaSalida);
+      $dias = $fechaIntervalo->format('%d');
+      if($dias > 0 && $tipoCliente != 5 && $tipoTarifa != 7){
+        $fecha =  new \DateTime();
+        $fechaIni = $fecha->format('Y-m-d')." 00:00:00";
+        $fechaFin = $fecha->format('Y-m-d')." 23:59:59";
+        $pagoSancion = $this->_pagoSancion->dql(
+          "SELECT p FROM Entities\PagoSancion p WHERE p.documento =:tarjeta AND p.fecha >=:fechaIni AND p.fecha <=:fechaFin
+          AND (p.tiposancion = 5 OR p.tiposancion = 6)",
+          array('tarjeta' => $ingresoTarjeta[0]->getTarjeta(), 'fechaIni' => $fechaIni, 'fechaFin' => $fechaFin));
+        if(!count($pagoSancion)){
+          $array['respuesta'] = false;
+          $array['mensaje'] = 'La Tarjeta debe Pagar una Sancion';
+          return  json_encode($array);
+        }
+      }
+      //////////////////////////////////////////////
       $this->_ingreso->getInstance()->setFechaSalida(new \DateTime());
       try {
         $this->_ingreso->save();
+
+        $datetime1 = new DateTime($fechaEntrada->format('Y-m-d'));
+        $datetime2 = new DateTime($tarjeta->getFechaFin()->format('Y-m-d'));
+        $interval = $datetime1->diff($datetime2);
+        //$dias = $interval->format('%R%a días');
+        $dias = $interval->format('%R%a');
+        $dias = $dias - 1;
+        $dias = $dias." días";
+        $dias = str_replace("+","",$dias);
+
         $array['respuesta'] = true;
         $array['tipo'] = $tarjeta->getTipoVehiculo()->getId();
         $array['descripcion'] = $tarjeta->getTipoVehiculo()->getDescripcion();
         $array['fecha'] = $this->_ingreso->getInstance()->getFechaSalida()->format('d-m-Y H:i');
+        $array['vigencia'] = 'Vencimiento: '.$dias.'.';
       } catch (Exception $e) {
         $array['respuesta'] = false;
         $array['mensaje'] = 'Error en el Proceso';
