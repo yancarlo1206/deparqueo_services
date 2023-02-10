@@ -14,8 +14,28 @@ $data = array("tipovehiculo" => "1");
 //$data = json_decode($data);
 //$data = array("direccion" => "CALLE 30 N° 4-30 PATIO CENTRO", 'emailpersonal' => "Kendyardila23@hotmail.com", 'telefono' => "5712471");
 //$data = array("Authorization" => "");
+//$data = array("ticket" => "0005074969");
 //$ch = curl_init("http://localhost/code/clients/martha");
-$ch = curl_init("http://localhost/deparqueo_services/login");
+
+///ENTRADA A PARQUEADERO POR RFID///
+/*$data = array("rfid" => "0005074969");
+$ch = curl_init("http://localhost/deparqueo_services/entrada_rfid");*/
+////////////////////////////////////
+
+///ENTRADA A PARQUEADERO AUTOMOVIL///
+$data = array("tipovehiculo" => "1");
+$ch = curl_init("http://localhost/deparqueo_services/entrada");
+////////////////////////////////////
+
+
+
+//$data = array("ticket" => "AUT070223002");
+//$ch = curl_init("http://localhost/deparqueo_services/ticket");
+
+//$data = array("ticket" => "AUT070223002", "valorPorPagar" => "1000");
+//$ch = curl_init("http://localhost/deparqueo_services/ticket_pago");
+
+
  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
  curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($data));

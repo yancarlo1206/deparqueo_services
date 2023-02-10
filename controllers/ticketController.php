@@ -76,14 +76,16 @@ class ticketController extends Controller {
         $fechaEntrada = $this->_ingreso->getInstance()->getFechaIngreso();
         $valorPagado = $pagos[0]->getValor() + $pagos[0]->getIva();
         $valorTarifa = $this->calcular_tarifa( $this->_ingreso->getInstance());
+        $fechaPago = $pagos[0]->getFecha();
         $this->_variable->get(2);
         $vencido = $this->_variable->getInstance()->getValor();
-        $minutosLimite = (($valorPagado / $valorTarifa) * 15);
-        $fechaLimiteNoVencida = $fechaEntrada->modify('+'.$minutosLimite.' minute');
+        //$minutosLimite = (($valorPagado / $valorTarifa) * 15);
+        $minutosLimite = $vencido;
+        $fechaLimiteNoVencida = $fechaPago->modify('+'.$minutosLimite.' minute');
         $fechaLimite = $fechaEntrada->modify('+'.$minutosLimite+$vencido.' minute');
         $fechaLimiteComparar = $fechaLimite;
         $fechaActualComparar = new \DateTime();
-        if($fechaLimiteComparar < $fechaActualComparar){
+        if($fechaLimiteNoVencida < $fechaActualComparar){
           $fechaEntrada = $fechaLimiteNoVencida;
           $fechaSalida = new \DateTime();
           $fechaIntervalo = $fechaEntrada->diff($fechaSalida);
@@ -183,7 +185,8 @@ class ticketController extends Controller {
         $valorAdicional = $this->_tipoSancion->getInstance()->getValor() * $this->_ingreso->getInstance()->getCasco();
         $totalPagar = $totalPagar - $valorAdicional;
       }
-      $iva = $totalPagar * 0.19;
+      $baseGrabable = round($totalPagar / 1.19);
+      $iva = $totalPagar - $baseGrabable;
       $valor = $totalPagar - $iva;
       $this->_pago->getInstance()->setFecha(new \DateTime());
       $this->_pago->getInstance()->setValor($valor);
@@ -203,7 +206,8 @@ class ticketController extends Controller {
       $this->_pagoServicio->save();
       if($this->_ingreso->getInstance()->getCasco() > 0){
         $this->_pago = $this->loadModel('pago');
-        $iva = $valorAdicional * 0.19;
+        $baseGrabable = round($valorAdicional / 1.19);
+        $iva = $valorAdicional - $baseGrabable;
         $valor = $valorAdicional - $iva;
         $this->_pago->getInstance()->setFecha(new \DateTime());
         $this->_pago->getInstance()->setValor($valor);
@@ -239,8 +243,8 @@ class ticketController extends Controller {
         return  json_encode($array);
       }
       $this->_usuario->findByObject(array('rfid' => $rfid));
-      $totalPagar = $totalPagar;
-      $iva = $totalPagar * 0.19;
+      $baseGrabable = round($totalPagar / 1.19);
+      $iva = $totalPagar - $baseGrabable;
       $valor = $totalPagar - $iva;
       $this->_pago->getInstance()->setFecha(new \DateTime());
       $this->_pago->getInstance()->setValor($valor);

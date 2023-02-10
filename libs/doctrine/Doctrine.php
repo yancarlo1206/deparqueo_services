@@ -40,7 +40,7 @@ class Doctrine {
                 'host' => 'localhost',
                 'port' => '',
                 'user' => 'root',
-                'password' => 'adminoiti2019**',
+                'password' => 'root',
                 'dbname' => 'deparqueo_bd',
                 'charset' => 'utf8',
                 'driverOptions' => array(

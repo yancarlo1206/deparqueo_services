@@ -75,6 +75,11 @@ class parqueoController extends Controller {
         $array['mensaje'] = 'Tarjeta no Existe';
         return  json_encode($array);
       }
+      if($tarjeta && $tarjeta->getEstado() != 1){
+        $array['respuesta'] = false;
+        $array['mensaje'] = 'Tarjeta Inactiva';
+        return  json_encode($array);
+      }
       $fechaActual = new DateTime();
       if($tarjeta ->getFechaFin() < $fechaIngreso){
         $array['respuesta'] = false;
