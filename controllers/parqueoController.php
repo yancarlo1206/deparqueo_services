@@ -175,6 +175,27 @@ class parqueoController extends Controller {
         $array['mensaje'] = 'El TICKET no tiene un PAGO registrado';
         return  json_encode($array);
       }
+      //Validar que los pagos que tenga esten dentro del tiempo establecido//
+      $pagos = $this->_pago->findBy(array('ingreso' => $this->_ingreso->getInstance()->getId()));
+      $fechaEntrada = $this->_ingreso->getInstance()->getFechaIngreso();
+      $fechaPago = $pagos[0]->getFecha();
+      $this->_variable->get(2);
+      $vencido = $this->_variable->getInstance()->getValor();
+      $minutosLimite = $vencido;
+      $fechaLimiteNoVencida = $fechaPago->modify('+'.$minutosLimite.' minute');
+      $fechaLimite = $fechaEntrada->modify('+'.$minutosLimite+$vencido.' minute');
+      $fechaLimiteComparar = $fechaLimite;
+      $fechaActualComparar = new \DateTime();
+      if($fechaLimiteNoVencida < $fechaActualComparar){
+          $fechaEntrada = $fechaLimiteNoVencida;
+          $fechaSalida = new \DateTime();
+          $fechaIntervalo = $fechaEntrada->diff($fechaSalida);
+          $array['respuesta'] = false;
+          $array['mensaje'] = 'El TICKET excedio el tiempo de vencimiento';
+          return  json_encode($array);
+        }
+
+      ///////////////////////////////////////////////////////////////////////
       $this->_ingreso->getInstance()->setFechaSalida(new \DateTime());
       try {
         $this->_ingreso->save();

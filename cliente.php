@@ -23,18 +23,21 @@ $ch = curl_init("http://localhost/deparqueo_services/entrada_rfid");*/
 ////////////////////////////////////
 
 ///ENTRADA A PARQUEADERO AUTOMOVIL///
-$data = array("tipovehiculo" => "1");
-$ch = curl_init("http://localhost/deparqueo_services/entrada");
+//$data = array("tipovehiculo" => "1");
+//$ch = curl_init("http://localhost/deparqueo_services/entrada");
 ////////////////////////////////////
 
 
 
-//$data = array("ticket" => "AUT070223002");
-//$ch = curl_init("http://localhost/deparqueo_services/ticket");
+$data = array("ticket" => "AUT240223002");
+$ch = curl_init("http://localhost/deparqueo_services/ticket");
 
-//$data = array("ticket" => "AUT070223002", "valorPorPagar" => "1000");
+//$data = array("ticket" => "AUT240223002", "valorPorPagar" => "1000");
 //$ch = curl_init("http://localhost/deparqueo_services/ticket_pago");
 
+
+//$data = array("ticket" => "AUT240223002");
+//$ch = curl_init("http://localhost/deparqueo_services/salida");
 
  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");

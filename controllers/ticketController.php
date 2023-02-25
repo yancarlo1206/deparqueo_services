@@ -72,7 +72,7 @@ class ticketController extends Controller {
       if($this->_ingreso->getInstance()->getCasco() > 0){
         $array['casco'] = $this->_ingreso->getInstance()->getCasco();
       }
-      /*if(count($pagos)){
+      if(count($pagos)){
         $fechaEntrada = $this->_ingreso->getInstance()->getFechaIngreso();
         $valorPagado = $pagos[0]->getValor() + $pagos[0]->getIva();
         $valorTarifa = $this->calcular_tarifa( $this->_ingreso->getInstance());
@@ -93,7 +93,7 @@ class ticketController extends Controller {
           $array['valorPorPagar'] = $this->ValorPorPagar($this->_ingreso->getInstance(),$fechaIntervalo);
           return  json_encode($array);
         }
-      }*/
+      }
       if(count($pagos)){
         $valorPagado = 0;
         $valor = 0;
