@@ -92,6 +92,12 @@ class Server {
     echo $basico->consulta_pago($data);  
   }
 
+  private function entrada_bathroom_rfid($data){
+    include('controllers/bathroomController.php');
+    $basico = new bathroomController();
+    echo $basico->entrada_bathroom_rfid($data);  
+  }
+
   private function paths($url) {
     $uri = parse_url($url);
     return $uri['path'];
