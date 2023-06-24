@@ -6,9 +6,9 @@
 namespace Entities;
 
 /**
- * Tarjeta
+ * Tarjetabathroom
  *
- * @Table(name="tarjetabathroom", @Index(name="IXFK_tarjetabathroom_usuario", columns={"usuario"})})
+ * @Table(name="tarjetabathroom", indexes={@Index(name="IXFK_tarjetabathroom_usuario", columns={"usuario"})})
  * @Entity
  */
 class Tarjetabathroom

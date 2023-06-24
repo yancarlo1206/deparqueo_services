@@ -34,7 +34,7 @@ $ch = curl_init("http://localhost/deparqueo_services/ticket");
 
 
 ///TEST BATHROOM///
-$data = array("rfid" => "AUT240223002");
+$data = array("rfid" => "3");
 $ch = curl_init("http://localhost/deparqueo_services/entrada_bathroom_rfid");
 
 //$data = array("ticket" => "AUT240223002", "valorPorPagar" => "1000");

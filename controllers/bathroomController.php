@@ -9,10 +9,10 @@ class bathroomController extends Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->_tarjeta = $this->loadModel('tarjeta');
+        $this->_tarjeta = $this->loadModel('tarjetabathroom');
+        $this->_ingreso = $this->loadModel('ingresobathroom');
         $this->_tarifa = $this->loadModel('tarifa');
         $this->_tipoTarifa = $this->loadModel('tipotarifa');
-        $this->_caja = $this->loadModel('caja');
         $this->_usuario = $this->loadModel('usuario');
 	      $this->_variable = $this->loadModel('variable');
     }
@@ -21,7 +21,6 @@ class bathroomController extends Controller {
 
     public function entrada_bathroom_rfid($data){
       $array = array();
-      $fechaIngreso = new \DateTime();
       $tarjeta = $this->_tarjeta->findByObject(
         array('rfid' => $data->rfid)
       );
@@ -35,15 +34,36 @@ class bathroomController extends Controller {
         $array['mensaje'] = 'Tarjeta Inactiva';
         return  json_encode($array);
       }
-      $fechaActual = new DateTime();
-      if($tarjeta ->getFechaFin() < $fechaIngreso){
+      if($tarjeta && $tarjeta->getEntradas() == 0){
         $array['respuesta'] = false;
-        $array['mensaje'] = 'Tarjeta Vencida - Vigencia hasta: '.$tarjeta->getFechaFin()->format('d/m/Y');
+        $array['mensaje'] = 'Tarjeta sin Entradas';
         return  json_encode($array);
       }
-      $array['respuesta'] = true;
-      $array['numero'] = 0;
+      $ingreso = $this->ingreso_bathroom($tarjeta);
+      if($ingreso){
+        $this->_tarjeta->getInstance()->setEntradas($tarjeta->getEntradas()-1);
+        $this->_tarjeta->update();
+        $array['respuesta'] = true;
+        $array['mensaje'] = "Entradas restantes: ".$this->_tarjeta->getInstance()->getEntradas();
+      }else{
+        $array['respuesta'] = false;
+        $array['mensaje'] = 'Error en el Proceso';
+      }
       return  json_encode($array);
+    }
+
+    private function ingreso_bathroom($tarjeta=null){
+      $fechaIngreso = new \DateTime();
+      $this->_ingreso->getInstance()->setFecha($fechaIngreso);
+      $this->_ingreso->getInstance()->setFechaIngreso($fechaIngreso);
+      $this->_ingreso->getInstance()->setTarjeta($tarjeta);
+      try {
+        $this->_ingreso->save();
+        return true;
+      } catch (Exception $e) {
+        echo $e;
+        return false;        
+      }
     }
 
 }
