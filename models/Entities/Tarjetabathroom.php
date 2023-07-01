@@ -38,17 +38,6 @@ function __construct() {}
      */
     private $estado;
   
-    /**
-     * @var \Usuario
-     *
-     * @ManyToOne(targetEntity="Usuario")
-     * @JoinColumns({
-     *   @JoinColumn(name="usuario", referencedColumnName="id")
-     * })
-     */
-    private $usuario;
-
-
     /** 
      * Set rfid
      *
@@ -118,26 +107,4 @@ function __construct() {}
         return $this->entradas;
     }
 
-    /** 
-     * Set usuario
-     *
-     * @param \Usuario $usuario
-     * @return Tarjeta
-     */
-    public function setUsuario($usuario = null)
-    {
-        $this->usuario = $usuario;
-    
-        return $this;
-    }
-
-    /**
-     * Get usuario
-     *
-     * @return \Usuario 
-     */
-    public function getUsuario()
-    {
-        return $this->usuario;
-    }
 }
